@@ -18,8 +18,8 @@ function App() {
   const pageFxRef = useRef(null)
   const isTransitioningRef = useRef(false)
   const transitionTweenRef = useRef(null)
-  const wheelLockRef = useRef(false)
-  const wheelUnlockTimerRef = useRef(null)
+  const wheelIntentRef = useRef(0)
+  const lastWheelEventAtRef = useRef(0)
   const wheelCooldownUntilRef = useRef(0)
 
   useFadeInOnScroll('.fade-in-section')
@@ -41,61 +41,243 @@ function App() {
       alpha: true,
       antialias: true,
     })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.8))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.35))
 
     const world = new THREE.Group()
     scene.add(world)
 
-    const pointsGeometry = new THREE.BufferGeometry()
-    const pointCount = 1800
-    const pointPositions = new Float32Array(pointCount * 3)
-    for (let i = 0; i < pointCount; i += 1) {
-      const i3 = i * 3
-      pointPositions[i3] = (Math.random() - 0.5) * 24
-      pointPositions[i3 + 1] = (Math.random() - 0.5) * 16
-      pointPositions[i3 + 2] = (Math.random() - 0.5) * 20
+    const waveUniforms = {
+      uTime: { value: 0 },
+      uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+      uDark: { value: new THREE.Color(0xfcfeff) },
+      uMid: { value: new THREE.Color(0xf3f9ff) },
+      uLight: { value: new THREE.Color(0xdceeff) },
+      uAccent: { value: new THREE.Color(0x9fd2ff) },
     }
-    pointsGeometry.setAttribute('position', new THREE.BufferAttribute(pointPositions, 3))
 
-    const pointsMaterial = new THREE.PointsMaterial({
-      color: 0x5aa2ff,
-      size: 0.028,
+    const waveMaterial = new THREE.ShaderMaterial({
+      uniforms: waveUniforms,
       transparent: true,
-      opacity: 0.35,
-      sizeAttenuation: true,
       depthWrite: false,
-    })
-    const points = new THREE.Points(pointsGeometry, pointsMaterial)
-    world.add(points)
+      vertexShader: `
+        varying vec2 vUv;
+        varying float vWave;
+        uniform float uTime;
 
-    const wireMaterial = new THREE.MeshStandardMaterial({
-      color: 0xc7dcff,
-      emissive: 0x1d4ed8,
-      emissiveIntensity: 0.08,
-      roughness: 0.22,
-      metalness: 0.72,
-      wireframe: true,
+        void main() {
+          vUv = uv;
+          vec3 pos = position;
+          float waveA = sin((pos.x * 0.58 + uTime * 0.86) * 1.8) * 0.08;
+          float waveB = sin((pos.y * 1.2 - uTime * 0.95) * 2.2) * 0.05;
+          float ribbonA = sin((pos.x * 0.32 + pos.y * 1.35 - uTime * 0.62) * 3.1) * 0.06;
+          float ribbonB = sin((pos.x * 0.25 + pos.y * 1.08 - uTime * 0.5) * 4.4) * 0.025;
+          float height = waveA + waveB + ribbonA + ribbonB;
+          float sideFade = smoothstep(0.02, 0.18, uv.x) * smoothstep(0.02, 0.18, 1.0 - uv.x);
+          pos.z += height * sideFade;
+          vWave = height * sideFade;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+      `,
+      fragmentShader: `
+        varying vec2 vUv;
+        varying float vWave;
+        uniform vec2 uResolution;
+        uniform vec3 uDark;
+        uniform vec3 uMid;
+        uniform vec3 uLight;
+        uniform vec3 uAccent;
+        uniform float uTime;
+
+        void main() {
+          vec2 uv = vUv;
+          vec2 screenUv = gl_FragCoord.xy / uResolution.xy;
+          float t = uTime;
+          float sideFade = smoothstep(0.03, 0.2, uv.x) * smoothstep(0.03, 0.2, 1.0 - uv.x);
+          float baseMix = smoothstep(0.0, 1.0, uv.x * 0.46 + uv.y * 0.66);
+          vec3 color = mix(uDark, uMid, baseMix);
+
+          float ribbonMainCurve = 0.2 + uv.x * 0.48 + sin(uv.x * 6.2 + t * 0.9) * 0.025;
+          float ribbonMain = smoothstep(0.13, 0.0, abs(uv.y - ribbonMainCurve));
+          float ribbonSubCurve = 0.14 + uv.x * 0.44 + sin(uv.x * 7.4 + t * 1.15 + 0.65) * 0.02;
+          float ribbonSub = smoothstep(0.08, 0.0, abs(uv.y - ribbonSubCurve));
+
+          float coreLine = smoothstep(0.022, 0.0, abs(uv.y - ribbonMainCurve));
+          float techPulse = 0.72 + 0.28 * sin(t * 1.7 + uv.x * 8.2);
+          color += mix(uLight, uAccent, 0.45) * ribbonMain * (0.18 + techPulse * 0.15) * sideFade;
+          color += mix(uMid, uLight, 0.7) * ribbonSub * 0.12 * sideFade;
+          color += uAccent * coreLine * 0.26 * sideFade;
+
+          float scan = sin((screenUv.y * 1080.0) + t * 7.5) * 0.5 + 0.5;
+          color += uAccent * scan * 0.0045;
+
+          vec2 gridUv = screenUv * vec2(24.0, 15.0);
+          vec2 grid = abs(fract(gridUv - 0.5) - 0.5) / fwidth(gridUv);
+          float gridLine = 1.0 - min(min(grid.x, grid.y), 1.0);
+          color += vec3(0.05, 0.1, 0.18) * gridLine * 0.032;
+
+          vec2 dotUv = fract(screenUv * vec2(36.0, 22.0));
+          float dot = smoothstep(0.06, 0.0, length(dotUv - 0.5));
+          color += vec3(0.07, 0.12, 0.2) * dot * 0.014;
+
+          vec2 core = screenUv - vec2(0.82, 0.58);
+          float coreDist = length(core);
+          float coreGlow = smoothstep(0.34, 0.0, coreDist);
+          float ring = smoothstep(0.21, 0.18, coreDist) - smoothstep(0.17, 0.14, coreDist);
+          color += uLight * coreGlow * 0.12 * sideFade;
+          color += uAccent * ring * (0.2 + 0.12 * sin(t * 2.2)) * sideFade;
+
+          float waveHighlight = smoothstep(-0.02, 0.18, vWave) * 0.1;
+          color += vec3(0.02, 0.06, 0.12) * waveHighlight;
+
+          float vignette = smoothstep(0.92, 0.2, distance(screenUv, vec2(0.56, 0.52)));
+          color *= mix(0.985, 1.015, vignette);
+
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `,
+    })
+
+    const waveSurface = new THREE.Mesh(new THREE.PlaneGeometry(40, 24, 210, 140), waveMaterial)
+    waveSurface.position.set(0, 0, -6.5)
+    world.add(waveSurface)
+
+    const dimensionalCubes = []
+    const cubeConfigs = [
+      { size: 1.75, x: 5.5, y: 1.6, z: -3.3, speed: 0.56, phase: 0.3, moveX: 1.35, moveY: 0.52, moveZ: 0.36 },
+      { size: 1.32, x: -5.2, y: -1.3, z: -3.9, speed: 0.68, phase: 1.0, moveX: 1.18, moveY: 0.44, moveZ: 0.32 },
+      { size: 1.18, x: 2.8, y: -2.4, z: -3.0, speed: 0.76, phase: 2.1, moveX: 1.42, moveY: 0.56, moveZ: 0.42 },
+      { size: 1.42, x: -2.1, y: 2.1, z: -3.4, speed: 0.6, phase: 2.7, moveX: 1.08, moveY: 0.48, moveZ: 0.34 },
+      { size: 1.08, x: 0.9, y: 0.8, z: -2.7, speed: 0.84, phase: 3.2, moveX: 1.26, moveY: 0.4, moveZ: 0.3 },
+      { size: 1.22, x: -7.0, y: 3.2, z: -3.5, speed: 0.62, phase: 4.1, moveX: 1.1, moveY: 0.36, moveZ: 0.3 },
+      { size: 1.36, x: 7.3, y: 1.2, z: -3.6, speed: 0.58, phase: 4.8, moveX: 1.24, moveY: 0.42, moveZ: 0.34 },
+      { size: 1.28, x: 7.1, y: -3.0, z: -3.7, speed: 0.66, phase: 5.3, moveX: 1.18, moveY: 0.46, moveZ: 0.36 },
+    ]
+
+    cubeConfigs.forEach((config) => {
+      const cubeGroup = new THREE.Group()
+      const cubeGeometry = new THREE.BoxGeometry(config.size, config.size, config.size)
+      const cubeFillMaterial = new THREE.MeshBasicMaterial({
+        color: 0xd9ecff,
+        transparent: true,
+        opacity: 0.16,
+      })
+      const cubeFill = new THREE.Mesh(cubeGeometry, cubeFillMaterial)
+      const edgeGeometry = new THREE.EdgesGeometry(cubeGeometry)
+      const edgeMaterial = new THREE.LineBasicMaterial({
+        color: 0x79beff,
+        transparent: true,
+        opacity: 0.84,
+      })
+      const cubeEdges = new THREE.LineSegments(edgeGeometry, edgeMaterial)
+
+      const coreGeometry = new THREE.BoxGeometry(config.size * 0.42, config.size * 0.42, config.size * 0.42)
+      const coreMaterial = new THREE.MeshBasicMaterial({
+        color: 0xaed8ff,
+        transparent: true,
+        opacity: 0.34,
+      })
+      const cubeCore = new THREE.Mesh(coreGeometry, coreMaterial)
+
+      cubeGroup.add(cubeFill)
+      cubeGroup.add(cubeEdges)
+      cubeGroup.add(cubeCore)
+      cubeGroup.position.set(config.x, config.y, config.z)
+      world.add(cubeGroup)
+      dimensionalCubes.push({ group: cubeGroup, cubeFill, cubeEdges, cubeCore, ...config })
+    })
+
+    const megaCubeGeometry = new THREE.BoxGeometry(5.4, 5.4, 5.4)
+    const megaCubeEdges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(megaCubeGeometry),
+      new THREE.LineBasicMaterial({
+        color: 0xd6ebff,
+        transparent: true,
+        opacity: 0.26,
+      }),
+    )
+    megaCubeEdges.position.set(4.2, -0.2, -6.8)
+    megaCubeEdges.rotation.set(0.55, 0.48, 0.12)
+    world.add(megaCubeEdges)
+
+    const technoGlyphs = []
+    const glyphConfigs = [
+      { size: 0.9, x: -6.2, y: 0.4, z: -3.0, speed: 0.74, phase: 0.4, moveX: 0.72, moveY: 0.26 },
+      { size: 1.05, x: 6.5, y: -0.5, z: -3.2, speed: 0.62, phase: 1.3, moveX: 0.66, moveY: 0.3 },
+      { size: 0.78, x: 3.8, y: 2.8, z: -3.6, speed: 0.86, phase: 2.2, moveX: 0.58, moveY: 0.22 },
+      { size: 0.84, x: -3.9, y: -2.9, z: -3.4, speed: 0.7, phase: 2.9, moveX: 0.62, moveY: 0.25 },
+    ]
+
+    glyphConfigs.forEach((config) => {
+      const glyphGroup = new THREE.Group()
+      const octaEdges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.OctahedronGeometry(config.size * 0.55)),
+        new THREE.LineBasicMaterial({
+          color: 0x8ec6ff,
+          transparent: true,
+          opacity: 0.56,
+        }),
+      )
+
+      const hexPoints = []
+      for (let i = 0; i < 6; i += 1) {
+        const angle = (i / 6) * Math.PI * 2
+        hexPoints.push(
+          new THREE.Vector3(Math.cos(angle) * config.size, Math.sin(angle) * config.size, 0),
+        )
+      }
+      const hexLoop = new THREE.LineLoop(
+        new THREE.BufferGeometry().setFromPoints(hexPoints),
+        new THREE.LineBasicMaterial({
+          color: 0xa9d6ff,
+          transparent: true,
+          opacity: 0.46,
+        }),
+      )
+      hexLoop.rotation.x = Math.PI * 0.25
+
+      const triPoints = [
+        new THREE.Vector3(0, config.size * 0.72, 0),
+        new THREE.Vector3(-config.size * 0.62, -config.size * 0.5, 0),
+        new THREE.Vector3(config.size * 0.62, -config.size * 0.5, 0),
+      ]
+      const triLoop = new THREE.LineLoop(
+        new THREE.BufferGeometry().setFromPoints(triPoints),
+        new THREE.LineBasicMaterial({
+          color: 0xc6e7ff,
+          transparent: true,
+          opacity: 0.36,
+        }),
+      )
+      triLoop.rotation.y = Math.PI * 0.3
+
+      glyphGroup.add(octaEdges)
+      glyphGroup.add(hexLoop)
+      glyphGroup.add(triLoop)
+      glyphGroup.position.set(config.x, config.y, config.z)
+      world.add(glyphGroup)
+      technoGlyphs.push({ group: glyphGroup, octaEdges, hexLoop, triLoop, ...config })
+    })
+
+    const sparkCount = 180
+    const sparkPositions = new Float32Array(sparkCount * 3)
+    for (let i = 0; i < sparkCount; i += 1) {
+      const i3 = i * 3
+      sparkPositions[i3] = (Math.random() - 0.5) * 16
+      sparkPositions[i3 + 1] = (Math.random() - 0.5) * 9
+      sparkPositions[i3 + 2] = -5.2 - Math.random() * 2.2
+    }
+    const sparkGeometry = new THREE.BufferGeometry()
+    sparkGeometry.setAttribute('position', new THREE.BufferAttribute(sparkPositions, 3))
+    const sparkMaterial = new THREE.PointsMaterial({
+      color: 0x9bd7ff,
+      size: 0.035,
       transparent: true,
-      opacity: 0.2,
+      opacity: 0.38,
+      depthWrite: false,
+      sizeAttenuation: true,
     })
-
-    const torusMesh = new THREE.Mesh(new THREE.TorusKnotGeometry(2.2, 0.36, 260, 24), wireMaterial)
-    torusMesh.position.set(5.2, -2, -6)
-    world.add(torusMesh)
-
-    const icosahedronMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(1.7, 1), wireMaterial.clone())
-    icosahedronMesh.material.opacity = 0.16
-    icosahedronMesh.position.set(-5.5, 2.5, -7)
-    world.add(icosahedronMesh)
-
-    const ambientLight = new THREE.AmbientLight(0xe0ecff, 0.88)
-    scene.add(ambientLight)
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.2)
-    keyLight.position.set(4, 5, 8)
-    scene.add(keyLight)
-    const fillLight = new THREE.PointLight(0x60a5fa, 0.55, 42)
-    fillLight.position.set(-5, -3, 6)
-    scene.add(fillLight)
+    const sparks = new THREE.Points(sparkGeometry, sparkMaterial)
+    world.add(sparks)
 
     const size = { width: 0, height: 0 }
     const updateSize = () => {
@@ -104,6 +286,7 @@ function App() {
       camera.aspect = size.width / size.height
       camera.updateProjectionMatrix()
       renderer.setSize(size.width, size.height, false)
+      waveUniforms.uResolution.value.set(size.width, size.height)
     }
 
     updateSize()
@@ -114,13 +297,33 @@ function App() {
 
     const render = () => {
       const elapsed = clock.getElapsedTime()
+      waveUniforms.uTime.value = elapsed
 
-      points.rotation.y = elapsed * 0.015
-      points.rotation.x = elapsed * 0.008
-      torusMesh.rotation.x = elapsed * 0.14
-      torusMesh.rotation.y = elapsed * 0.18
-      icosahedronMesh.rotation.x = -elapsed * 0.12
-      icosahedronMesh.rotation.y = elapsed * 0.1
+      dimensionalCubes.forEach((cube) => {
+        const pulse = 0.6 + 0.4 * Math.sin(elapsed * cube.speed * 1.8 + cube.phase)
+        cube.group.position.x = cube.x + Math.sin(elapsed * cube.speed + cube.phase) * cube.moveX
+        cube.group.position.y = cube.y + Math.sin(elapsed * cube.speed * 1.2 + cube.phase) * cube.moveY
+        cube.group.position.z = cube.z + Math.cos(elapsed * cube.speed * 0.9 + cube.phase) * cube.moveZ
+        cube.group.rotation.x = Math.sin(elapsed * cube.speed * 0.5 + cube.phase) * 0.14
+        cube.group.rotation.y = Math.cos(elapsed * cube.speed * 0.45 + cube.phase) * 0.18
+        cube.group.rotation.z = Math.sin(elapsed * cube.speed * 0.4 + cube.phase) * 0.12
+        cube.cubeEdges.material.opacity = 0.58 + pulse * 0.34
+        cube.cubeCore.material.opacity = 0.2 + pulse * 0.28
+      })
+      megaCubeEdges.rotation.y += 0.0012
+      megaCubeEdges.rotation.x += 0.0008
+      technoGlyphs.forEach((glyph) => {
+        const pulse = 0.55 + 0.45 * Math.sin(elapsed * glyph.speed * 2 + glyph.phase)
+        glyph.group.position.x = glyph.x + Math.sin(elapsed * glyph.speed + glyph.phase) * glyph.moveX
+        glyph.group.position.y = glyph.y + Math.cos(elapsed * glyph.speed * 1.15 + glyph.phase) * glyph.moveY
+        glyph.group.rotation.z += 0.0034 + glyph.speed * 0.001
+        glyph.group.rotation.y -= 0.0024 + glyph.speed * 0.0008
+        glyph.octaEdges.material.opacity = 0.36 + pulse * 0.28
+        glyph.hexLoop.material.opacity = 0.24 + pulse * 0.24
+        glyph.triLoop.material.opacity = 0.16 + pulse * 0.2
+      })
+      sparks.rotation.z += 0.00085
+      sparks.rotation.y -= 0.00055
 
       camera.position.x = 0
       camera.position.y = 0
@@ -134,12 +337,29 @@ function App() {
     return () => {
       window.removeEventListener('resize', updateSize)
       window.cancelAnimationFrame(frameId)
-      pointsGeometry.dispose()
-      pointsMaterial.dispose()
-      torusMesh.geometry.dispose()
-      torusMesh.material.dispose()
-      icosahedronMesh.geometry.dispose()
-      icosahedronMesh.material.dispose()
+      dimensionalCubes.forEach((cube) => {
+        cube.cubeFill.geometry.dispose()
+        cube.cubeFill.material.dispose()
+        cube.cubeEdges.geometry.dispose()
+        cube.cubeEdges.material.dispose()
+        cube.cubeCore.geometry.dispose()
+        cube.cubeCore.material.dispose()
+      })
+      megaCubeGeometry.dispose()
+      megaCubeEdges.geometry.dispose()
+      megaCubeEdges.material.dispose()
+      technoGlyphs.forEach((glyph) => {
+        glyph.octaEdges.geometry.dispose()
+        glyph.octaEdges.material.dispose()
+        glyph.hexLoop.geometry.dispose()
+        glyph.hexLoop.material.dispose()
+        glyph.triLoop.geometry.dispose()
+        glyph.triLoop.material.dispose()
+      })
+      sparkGeometry.dispose()
+      sparkMaterial.dispose()
+      waveSurface.geometry.dispose()
+      waveMaterial.dispose()
       renderer.dispose()
     }
   }, [])
@@ -169,6 +389,10 @@ function App() {
     const currentSection = document.getElementById(sectionIds[currentIndex])
     const target = document.getElementById(sectionIds[nextIndex])
     const pageFxElement = pageFxRef.current
+    const jumpDistance = Math.abs(nextIndex - currentIndex)
+    const scrollDuration = Math.min(0.72, 0.48 + jumpDistance * 0.08)
+    const targetRise = jumpDistance > 1 ? 48 : 34
+    const shouldAnimateCurrent = Boolean(currentSection && currentSection !== target && currentIndex !== 0)
     if (!target) {
       return
     }
@@ -180,108 +404,138 @@ function App() {
     }
 
     isTransitioningRef.current = true
-    wheelCooldownUntilRef.current = performance.now() + 760
-    window.scrollTo({ top: target.offsetTop, behavior: 'auto' })
+    wheelCooldownUntilRef.current = performance.now() + 280 + jumpDistance * 40
 
     const transitionColor = ['59,130,246', '56,189,248', '99,102,241', '37,99,235', '29,78,216'][nextIndex]
-    if (pageFxElement) {
-      gsap.fromTo(
-        pageFxElement,
-        {
-          opacity: 0,
-          scale: 0.96,
-          background: `radial-gradient(circle at center, rgba(${transitionColor},0.22), rgba(15,23,42,0) 62%)`,
-        },
-        {
-          opacity: 0.78,
-          scale: 1.05,
-          duration: 0.3,
-          ease: 'sine.inOut',
-          yoyo: true,
-          repeat: 1,
-        },
-      )
-    }
+    const gradientAnchor = direction > 0 ? '50% 56%' : '50% 44%'
 
+    const scrollState = { y: window.scrollY }
     const transitionTimeline = gsap.timeline({
       onComplete: () => {
+        if (pageFxElement) {
+          pageFxElement.style.removeProperty('opacity')
+          pageFxElement.style.removeProperty('transform')
+          pageFxElement.style.removeProperty('background')
+        }
         if (currentSection) {
           currentSection.style.removeProperty('z-index')
-          currentSection.style.removeProperty('clip-path')
           currentSection.style.removeProperty('transform')
           currentSection.style.removeProperty('opacity')
-          currentSection.style.removeProperty('filter')
+          currentSection.style.removeProperty('will-change')
         }
         target.style.removeProperty('z-index')
-        target.style.removeProperty('clip-path')
         target.style.removeProperty('transform')
         target.style.removeProperty('opacity')
-        target.style.removeProperty('filter')
+        target.style.removeProperty('will-change')
         isTransitioningRef.current = false
         transitionTweenRef.current = null
       },
     })
 
-    if (currentSection && currentSection !== target) {
+    if (pageFxElement) {
+      gsap.killTweensOf(pageFxElement)
+      transitionTimeline.set(
+        pageFxElement,
+        {
+          background: `radial-gradient(circle at ${gradientAnchor}, rgba(${transitionColor},0.2), rgba(15,23,42,0) 64%)`,
+        },
+        0,
+      )
+      transitionTimeline.fromTo(
+        pageFxElement,
+        {
+          opacity: 0,
+          scale: 0.98,
+        },
+        {
+          opacity: 0.42,
+          scale: 1.01,
+          duration: scrollDuration * 0.38,
+          ease: 'sine.out',
+          overwrite: 'auto',
+        },
+        0,
+      )
+      transitionTimeline.to(
+        pageFxElement,
+        {
+          opacity: 0,
+          scale: 1.03,
+          duration: scrollDuration * 0.62,
+          ease: 'sine.in',
+        },
+        scrollDuration * 0.18,
+      )
+    }
+
+    transitionTimeline.to(
+      scrollState,
+      {
+        y: target.offsetTop,
+        duration: scrollDuration,
+        ease: 'power3.out',
+        onUpdate: () => {
+          window.scrollTo(0, scrollState.y)
+        },
+      },
+      0,
+    )
+
+    if (shouldAnimateCurrent) {
       transitionTimeline.fromTo(
         currentSection,
         {
-          yPercent: 0,
           opacity: 1,
-          filter: 'brightness(1) blur(0px)',
-          clipPath: 'inset(0 0 0 0)',
           zIndex: 25,
+          willChange: 'opacity',
         },
         {
-          yPercent: direction > 0 ? -8 : 8,
-          opacity: 0.46,
-          clipPath: direction > 0 ? 'inset(0 0 100% 0)' : 'inset(100% 0 0 0)',
-          filter: 'brightness(0.9) blur(3px)',
-          duration: 0.34,
-          ease: 'power2.in',
+          opacity: 0.72,
+          duration: Math.max(0.18, scrollDuration * 0.46),
+          ease: 'sine.out',
         },
+        0,
       )
     }
 
     transitionTimeline.fromTo(
       target,
       {
-        yPercent: direction > 0 ? 10 : -10,
-        clipPath: direction > 0 ? 'inset(100% 0 0 0)' : 'inset(0 0 100% 0)',
-        filter: 'brightness(1.16) blur(4px)',
-        opacity: 0.72,
+        y: direction > 0 ? targetRise : -targetRise,
+        opacity: 0.78,
+        scale: 0.985,
         zIndex: 30,
+        willChange: 'transform, opacity',
       },
       {
-        yPercent: 0,
-        clipPath: 'inset(0 0 0 0)',
-        filter: 'brightness(1) blur(0px)',
+        y: 0,
         opacity: 1,
-        duration: 0.58,
+        scale: 1,
+        duration: Math.max(0.34, scrollDuration * 0.82),
         ease: 'power3.out',
       },
-      currentSection && currentSection !== target ? '-=0.08' : 0,
+      0,
     )
 
     transitionTweenRef.current = transitionTimeline
 
     const revealItems = target.querySelectorAll('.reveal-item')
     if (revealItems.length) {
+      gsap.killTweensOf(revealItems)
       gsap.fromTo(
         revealItems,
         {
-          y: 24,
-          opacity: 0.25,
-          filter: 'blur(8px)',
+          y: 18,
+          opacity: 0.35,
         },
         {
           y: 0,
           opacity: 1,
-          filter: 'blur(0px)',
-          duration: 0.5,
-          delay: 0.16,
-          stagger: 0.045,
+          duration: 0.28,
+          delay: jumpDistance > 1 ? 0.06 : 0.02,
+          stagger: 0.03,
           ease: 'power2.out',
+          overwrite: 'auto',
         },
       )
     }
@@ -300,13 +554,6 @@ function App() {
 
   useEffect(() => {
     const handleWheel = (event) => {
-      if (wheelUnlockTimerRef.current) {
-        window.clearTimeout(wheelUnlockTimerRef.current)
-      }
-      wheelUnlockTimerRef.current = window.setTimeout(() => {
-        wheelLockRef.current = false
-      }, 240)
-
       if (performance.now() < wheelCooldownUntilRef.current) {
         event.preventDefault()
         return
@@ -317,33 +564,34 @@ function App() {
         return
       }
 
-      if (wheelLockRef.current) {
-        event.preventDefault()
+      if (Math.abs(event.deltaY) < 3) {
         return
       }
 
-      if (Math.abs(event.deltaY) < 16) {
+      event.preventDefault()
+      const now = performance.now()
+      if (now - lastWheelEventAtRef.current > 140) {
+        wheelIntentRef.current = 0
+      }
+      wheelIntentRef.current += event.deltaY
+      lastWheelEventAtRef.current = now
+      if (Math.abs(wheelIntentRef.current) < 24) {
         return
       }
-
-      wheelLockRef.current = true
-      const nextDirection = event.deltaY > 0 ? 1 : -1
+      const nextDirection = wheelIntentRef.current > 0 ? 1 : -1
+      wheelIntentRef.current = 0
       const current = getCurrentIndex()
       const next = current + nextDirection
       if (next < 0 || next >= sectionIds.length) {
         return
       }
 
-      event.preventDefault()
       playPageTransition(next, nextDirection)
     }
 
     window.addEventListener('wheel', handleWheel, { passive: false })
     return () => {
       window.removeEventListener('wheel', handleWheel)
-      if (wheelUnlockTimerRef.current) {
-        window.clearTimeout(wheelUnlockTimerRef.current)
-      }
       if (transitionTweenRef.current) {
         transitionTweenRef.current.kill()
       }
@@ -351,11 +599,11 @@ function App() {
   }, [getCurrentIndex, playPageTransition])
 
   return (
-    <div className="relative min-h-screen bg-slate-50">
+    <div className="relative min-h-screen bg-transparent">
       <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0 h-full w-full"></canvas>
       <div ref={pageFxRef} className="pointer-events-none fixed inset-0 z-20 opacity-0"></div>
       <Navbar links={navLinks} onNavigate={handleNavigate} />
-      <div className="relative z-10 pt-12 lg:pt-0">
+      <div className="relative z-10 pt-12 lg:pl-52 lg:pt-0">
         <main>
           <Hero />
           <ProductsSection products={products} />

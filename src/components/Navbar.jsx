@@ -62,7 +62,7 @@ function Navbar({ links, onNavigate }) {
         Contact Sales
       </a>
 
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200/80 bg-white/35 backdrop-blur-sm lg:hidden">
+      <header className="fixed inset-x-0 top-0 z-40 border-b border-transparent bg-transparent lg:hidden">
         <nav className="mx-auto flex w-full items-center justify-end gap-4 px-5 py-3">
           {navItems.map((link) => (
             <a

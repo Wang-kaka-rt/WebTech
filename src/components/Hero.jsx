@@ -66,7 +66,7 @@ function Hero() {
         <div className="max-w-3xl">
           <div
             ref={panelRef}
-            className="reveal-item rounded-3xl border border-white/60 bg-white/62 p-6 shadow-2xl shadow-brand-900/10 backdrop-blur-md sm:p-8 lg:p-10"
+            className="reveal-item bg-transparent p-6 sm:p-8 lg:p-10"
           >
             <p className="reveal-item mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-brand-700">
               Precision Electronics for Industry
