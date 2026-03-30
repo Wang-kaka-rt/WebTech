@@ -122,10 +122,10 @@ function TechnologySection({ advantages }) {
       ></div>
       <div className="mx-auto w-full max-w-6xl px-6 py-14 lg:px-10">
         <div className="max-w-2xl">
-          <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-brand-700">
+          <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">
             Technology Advantage
           </p>
-          <h2 className="reveal-item mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+          <h2 className="reveal-item mt-4 text-3xl font-semibold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(2,8,24,0.65)] sm:text-4xl">
             Built for Reliability, Scale, and Speed
           </h2>
         </div>

@@ -1,0 +1,110 @@
+{
+  "joinUs": "加入我们",
+  "switchLanguage": "切换语言",
+  "nav": [
+    { "label": "首页", "href": "#hero" },
+    { "label": "核心业务", "href": "#products" },
+    { "label": "关于我们", "href": "#about" },
+    { "label": "主要人员", "href": "#team" },
+    { "label": "联系我们", "href": "#contact" },
+    { "label": "合作组织", "href": "#partners" }
+  ],
+  "hero": {
+    "title": "以人工智能驱动全球创新发展",
+    "description1": "IBEREX是一家融合人工智能技术研发与欧洲本地化运营的国际化科技企业。",
+    "description2": "公司以人工智能为核心驱动力，致力于为全球客户提供智能化解决方案与数字化转型服务。",
+    "primaryButton": "关于我们",
+    "secondaryButton": "联系我们"
+  },
+  "products": {
+    "badge": "Products / 核心业务",
+    "title": "核心业务包括",
+    "items": [
+      {
+        "title": "人工智能技术研发",
+        "description": "涵盖基础软件开发、算法研究及AI应用软件开发。"
+      },
+      {
+        "title": "智能应用与系统集成",
+        "description": "提供行业应用系统、智能控制系统及整体解决方案。"
+      },
+      {
+        "title": "技术服务与创新支持",
+        "description": "包括技术开发、咨询、转让及推广等全链条服务。"
+      },
+      {
+        "title": "智能制造与设备",
+        "description": "涉及智能基础制造装备及相关技术能力。"
+      },
+      {
+        "title": "信息安全与网络服务",
+        "description": "覆盖网络安全软件开发、安防设备、信息安全系统及互联网安全服务。"
+      },
+      {
+        "title": "平台与生态建设",
+        "description": "包括人工智能公共服务平台及双创服务平台建设。"
+      }
+    ]
+  },
+  "about": {
+    "sinceLabel": "自 2008 年起",
+    "cardTitle": "服务工业创新伙伴",
+    "cardDescription": "我们与自动化、能源平台和企业客户深度协作，为长期项目提供稳定可靠的技术解决方案。",
+    "badge": "关于 IBEREX",
+    "title": "经营范围概述",
+    "description1": "IBEREX专注于人工智能技术与智能系统的研发与应用，围绕软件开发、系统集成及信息安全等领域，提供覆盖技术研发、产品实现与行业落地的一体化服务。",
+    "description2": "通过多领域协同发展，公司致力于为客户提供高效、安全、可扩展的智能化解决方案。"
+  },
+  "team": {
+    "badge": "主要人员",
+    "title": "核心管理与技术团队",
+    "description": "团队由跨领域专家组成，覆盖人工智能研发、产品工程、国际化运营与行业解决方案交付，具备丰富的项目实践经验。",
+    "members": [
+      {
+        "title": "技术总监",
+        "name": "王振宇",
+        "description": "负责技术解决方案，和产品交付",
+        "experience": "从业时间：7年"
+      },
+      {
+        "title": "CEO",
+        "name": "窦程",
+        "description": "负责公司欧洲市场战略规划、本地化运营及合规事务，主导海外业务拓展与落地执行",
+        "experience": "从业时间：5年"
+      },
+      {
+        "title": "市场总监",
+        "name": "葛子健",
+        "description": "支持公司跨境业务合规及风险控制，推动本地化合作与资源整合",
+        "experience": "从业时间：5年"
+      }
+    ]
+  },
+  "contact": {
+    "badge": "联系我们",
+    "title": "沟通您的下一步计划",
+    "description": "告诉我们您的产品需求，我们的工程团队将为您提供合适的技术路线建议。",
+    "address": "Madrid Innovation Campus, Calle de Tecnología 88, Spain",
+    "phone": "+34 900 210 880",
+    "email": "sales@novasemi.com",
+    "form": {
+      "name": "姓名",
+      "email": "邮箱",
+      "message": "留言内容",
+      "submit": "发送消息"
+    }
+  },
+  "partners": {
+    "badge": "合作组织",
+    "title": "生态合作伙伴",
+    "description": "我们与高校、科研机构、行业协会及企业伙伴建立长期协作关系，共同推动人工智能技术创新与产业落地。"
+  },
+  "footer": {
+    "links": {
+      "products": "核心业务",
+      "about": "关于我们",
+      "contact": "联系我们"
+    },
+    "copyright": "IBEREX Technology. 保留所有权利。"
+  }
+}

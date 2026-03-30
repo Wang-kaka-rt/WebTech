@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
+import logoImage from '../resource/logo.png'
 
-function Hero() {
+function Hero({ content }) {
   const heroRef = useRef(null)
   const panelRef = useRef(null)
 
@@ -57,39 +58,38 @@ function Hero() {
     <section
       id="hero"
       ref={heroRef}
-      className="fade-in-section relative flex min-h-[100svh] items-center overflow-hidden pb-16 pt-28 lg:pb-20 lg:pt-32"
+      className="fade-in-section relative flex min-h-[100svh] items-center overflow-hidden py-16 lg:-ml-52 lg:w-[calc(100%+13rem)] lg:py-20"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-100/45 via-white/25 to-slate-50/15"></div>
-      <div className="absolute inset-0 tech-grid opacity-35"></div>
-
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 lg:px-8">
-        <div className="max-w-3xl">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 lg:pl-32 lg:pr-8">
+        <div className="mx-auto max-w-4xl">
           <div
             ref={panelRef}
-            className="reveal-item bg-transparent p-6 sm:p-8 lg:p-10"
+            className="reveal-item bg-transparent p-6 text-center sm:p-8 lg:p-10"
           >
-            <p className="reveal-item mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-brand-700">
-              Precision Electronics for Industry
-            </p>
-            <h1 className="reveal-item text-4xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Advanced Semiconductor Solutions for Mission-Critical Systems
+            <div className="reveal-item mb-6 flex justify-center">
+              <img src={logoImage} alt="IBEREX" className="h-16 w-auto object-contain sm:h-20 lg:h-24" />
+            </div>
+            <h1 className="reveal-item text-4xl font-semibold leading-tight tracking-tight text-white drop-shadow-[0_4px_14px_rgba(2,8,24,0.65)] sm:text-5xl lg:text-6xl">
+              {content.title}
             </h1>
-            <p className="reveal-item mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-              NOVASEMI helps OEMs and industrial innovators accelerate product delivery with dependable
-              components, scalable platforms, and expert engineering support.
+            <p className="reveal-item mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-100 drop-shadow-[0_2px_10px_rgba(2,8,24,0.55)] sm:text-lg">
+              {content.description1}
             </p>
-            <div className="reveal-item mt-10 flex flex-wrap gap-4">
+            <p className="reveal-item mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-100 drop-shadow-[0_2px_10px_rgba(2,8,24,0.55)] sm:text-lg">
+              {content.description2}
+            </p>
+            <div className="reveal-item mt-10 flex flex-wrap justify-center gap-4">
               <a
-                href="#contact"
+                href="#about"
                 className="rounded-full bg-brand-600 px-7 py-3 text-sm font-semibold text-white transition-transform duration-300 hover:-translate-y-0.5 hover:bg-brand-700"
               >
-                Contact Us
+                {content.primaryButton}
               </a>
               <a
-                href="#products"
-                className="rounded-full border border-slate-300 bg-white/80 px-7 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-brand-400 hover:text-brand-700"
+                href="#contact"
+                className="rounded-full border border-white/45 bg-white/12 px-7 py-3 text-sm font-semibold text-white transition-colors hover:border-white/70 hover:bg-white/18"
               >
-                Learn More
+                {content.secondaryButton}
               </a>
             </div>
           </div>

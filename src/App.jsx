@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import gsap from 'gsap'
 import AboutSection from './components/AboutSection'
@@ -7,22 +7,92 @@ import Footer from './components/Footer'
 import Hero from './components/Hero'
 import Navbar from './components/Navbar'
 import ProductsSection from './components/ProductsSection'
-import TechnologySection from './components/TechnologySection'
-import { advantages, navLinks, products } from './data/content'
+import { DEFAULT_LANGUAGE, LANGUAGE_OPTIONS, TRANSLATIONS } from './i18n'
 import useFadeInOnScroll from './hooks/useFadeInOnScroll'
+import backgroundVideo from './resource/背景视频.mp4'
+import wangZhenyuImage from './resource/人物/王振宇.png'
+import douChengImage from './resource/人物/窦程.png'
+import geZijianImage from './resource/人物/葛子健.png'
+import iberexPartnerLogo from './resource/合作/iberex.png'
+import tokPartnerLogo from './resource/合作/tok.png'
+import ibizhongPartnerLogo from './resource/合作/伊比中新时代.png'
 
-const sectionIds = ['hero', 'products', 'technology', 'about', 'contact']
+const sectionIds = ['hero', 'products', 'about', 'team', 'contact', 'partners']
+const teamPhotos = [wangZhenyuImage, douChengImage, geZijianImage]
+const productIcons = ['🧠', '⚙️', '💡', '🏭', '🛡️', '🌐']
+const partnerLogos = [
+  { src: iberexPartnerLogo, name: 'IBEREX', sizeClass: 'max-h-20' },
+  { src: tokPartnerLogo, name: 'TOK', sizeClass: 'max-h-14' },
+  { src: ibizhongPartnerLogo, name: '伊比中新时代', sizeClass: 'max-h-40' },
+]
 
 function App() {
   const canvasRef = useRef(null)
+  const backgroundVideoRef = useRef(null)
+  const introBlurLayerRef = useRef(null)
+  const contentWrapperRef = useRef(null)
   const pageFxRef = useRef(null)
+  const [language, setLanguage] = useState(() => {
+    const saved = window.localStorage.getItem('lang')
+    return saved && TRANSLATIONS[saved] ? saved : DEFAULT_LANGUAGE
+  })
+  const [isIntroDone, setIsIntroDone] = useState(false)
   const isTransitioningRef = useRef(false)
   const transitionTweenRef = useRef(null)
   const wheelIntentRef = useRef(0)
   const lastWheelEventAtRef = useRef(0)
   const wheelCooldownUntilRef = useRef(0)
+  const t = useMemo(() => TRANSLATIONS[language] ?? TRANSLATIONS[DEFAULT_LANGUAGE], [language])
+  const languageSwitcher = useMemo(() => {
+    const currentIndex = LANGUAGE_OPTIONS.findIndex((item) => item.code === language)
+    const fallback = LANGUAGE_OPTIONS[0]
+    if (currentIndex === -1) {
+      return {
+        currentLabel: fallback.label,
+        nextLabel: fallback.label,
+      }
+    }
+    const currentOption = LANGUAGE_OPTIONS[currentIndex] ?? fallback
+    const nextOption = LANGUAGE_OPTIONS[(currentIndex + 1) % LANGUAGE_OPTIONS.length] ?? fallback
+    return {
+      currentLabel: currentOption.label,
+      nextLabel: nextOption.label,
+    }
+  }, [language])
+  const products = useMemo(
+    () => t.products.items.map((item, index) => ({ ...item, icon: productIcons[index] ?? '✨' })),
+    [t.products.items],
+  )
+  const coreTeam = useMemo(
+    () => t.team.members.map((member, index) => ({ ...member, photo: teamPhotos[index] })),
+    [t.team.members],
+  )
 
   useFadeInOnScroll('.fade-in-section')
+
+  useEffect(() => {
+    window.localStorage.setItem('lang', language)
+  }, [language])
+
+  useEffect(() => {
+    const backgroundVideoElement = backgroundVideoRef.current
+
+    const startIntro = () => {
+      window.requestAnimationFrame(() => setIsIntroDone(true))
+    }
+
+    if (backgroundVideoElement && backgroundVideoElement.readyState >= 2) {
+      startIntro()
+    } else if (backgroundVideoElement) {
+      backgroundVideoElement.addEventListener('loadeddata', startIntro, { once: true })
+    }
+
+    return () => {
+      if (backgroundVideoElement) {
+        backgroundVideoElement.removeEventListener('loadeddata', startIntro)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const canvasElement = canvasRef.current
@@ -377,6 +447,9 @@ function App() {
   }, [])
 
   const playPageTransition = useCallback((nextIndex, direction = 1) => {
+    if (!isIntroDone) {
+      return
+    }
     if (nextIndex < 0 || nextIndex >= sectionIds.length) {
       return
     }
@@ -539,7 +612,7 @@ function App() {
         },
       )
     }
-  }, [getCurrentIndex])
+  }, [getCurrentIndex, isIntroDone])
 
   const handleNavigate = useCallback((href) => {
     const id = href.replace('#', '')
@@ -552,8 +625,22 @@ function App() {
     playPageTransition(targetIndex, direction)
   }, [getCurrentIndex, playPageTransition])
 
+  const handleLanguageCycle = useCallback(() => {
+    setLanguage((currentLanguage) => {
+      const currentIndex = LANGUAGE_OPTIONS.findIndex((item) => item.code === currentLanguage)
+      if (currentIndex === -1) {
+        return DEFAULT_LANGUAGE
+      }
+      return LANGUAGE_OPTIONS[(currentIndex + 1) % LANGUAGE_OPTIONS.length].code
+    })
+  }, [])
+
   useEffect(() => {
     const handleWheel = (event) => {
+      if (!isIntroDone) {
+        event.preventDefault()
+        return
+      }
       if (performance.now() < wheelCooldownUntilRef.current) {
         event.preventDefault()
         return
@@ -596,22 +683,125 @@ function App() {
         transitionTweenRef.current.kill()
       }
     }
-  }, [getCurrentIndex, playPageTransition])
+  }, [getCurrentIndex, isIntroDone, playPageTransition])
 
   return (
     <div className="relative min-h-screen bg-transparent">
-      <canvas ref={canvasRef} className="pointer-events-none fixed inset-0 z-0 h-full w-full"></canvas>
+      <video
+        ref={backgroundVideoRef}
+        className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover"
+        src={backgroundVideo}
+        autoPlay
+        muted
+        playsInline
+        onEnded={() => setIsIntroDone(true)}
+        onError={() => setIsIntroDone(true)}
+      ></video>
+      <div
+        className={`pointer-events-none fixed inset-0 z-10 transition-opacity duration-700 ${
+          isIntroDone ? 'bg-slate-950/18' : 'bg-transparent'
+        }`}
+      ></div>
+      <div
+        className={`pointer-events-none fixed inset-0 z-[15] transition-opacity duration-700 ${
+          isIntroDone ? 'opacity-100' : 'opacity-40'
+        }`}
+        style={{
+          backgroundImage:
+            'linear-gradient(136deg, rgba(8,34,92,0.58) 0%, rgba(12,66,168,0.28) 35%, rgba(5,20,56,0.66) 100%), linear-gradient(123deg, rgba(255,255,255,0) 26%, rgba(255,255,255,0.18) 44%, rgba(255,255,255,0) 58%)',
+        }}
+      ></div>
       <div ref={pageFxRef} className="pointer-events-none fixed inset-0 z-20 opacity-0"></div>
-      <Navbar links={navLinks} onNavigate={handleNavigate} />
-      <div className="relative z-10 pt-12 lg:pl-52 lg:pt-0">
-        <main>
-          <Hero />
-          <ProductsSection products={products} />
-          <TechnologySection advantages={advantages} />
-          <AboutSection />
-          <ContactSection />
-        </main>
-        <Footer />
+      <div
+        ref={introBlurLayerRef}
+        className={`pointer-events-none fixed inset-0 z-[25] transition-opacity duration-700 ${
+          isIntroDone ? 'backdrop-blur-md bg-white/16 opacity-100' : 'bg-transparent opacity-0'
+        }`}
+      ></div>
+      <div
+        ref={contentWrapperRef}
+        className={`relative z-30 transition-opacity duration-700 ${
+          isIntroDone ? 'opacity-100' : 'pointer-events-none select-none opacity-0'
+        }`}
+      >
+        <Navbar
+          links={t.nav}
+          onNavigate={handleNavigate}
+          onLanguageCycle={handleLanguageCycle}
+          currentLanguageLabel={languageSwitcher.currentLabel}
+          nextLanguageLabel={languageSwitcher.nextLabel}
+          switchLanguageLabel={t.switchLanguage}
+          joinLabel={t.joinUs}
+        />
+        <div className="relative z-10 pt-12 lg:pl-52 lg:pt-0">
+          <main>
+            <Hero content={t.hero} />
+            <ProductsSection products={products} content={t.products} />
+            <AboutSection content={t.about} />
+            <section id="team" className="fade-in-section flex min-h-[100svh] items-start py-14 lg:py-16">
+              <div className="mx-auto w-full max-w-6xl px-6 lg:px-8">
+                <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">
+                  {t.team.badge}
+                </p>
+                <h2 className="reveal-item mt-4 text-3xl font-semibold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(2,8,24,0.65)] sm:text-4xl">
+                  {t.team.title}
+                </h2>
+                <p className="reveal-item mt-6 max-w-3xl text-base leading-7 text-slate-100 drop-shadow-[0_2px_10px_rgba(2,8,24,0.55)] sm:text-lg">
+                  {t.team.description}
+                </p>
+                <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                  {coreTeam.map((member) => (
+                    <article
+                      key={member.name}
+                      className="reveal-item flex h-full flex-col rounded-2xl bg-gradient-to-b from-transparent via-white/65 to-white/65 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card"
+                    >
+                      <div className="mb-4">
+                        <img
+                          src={member.photo}
+                          alt={member.name}
+                          className="h-52 w-full object-contain drop-shadow-[0_14px_22px_rgba(15,23,42,0.2)]"
+                        />
+                      </div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">{member.title}</p>
+                      <h3 className="mt-2 text-2xl font-semibold text-slate-900">{member.name}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{member.description}</p>
+                      <p className="mt-auto pt-3 text-sm font-semibold text-slate-700">{member.experience}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+            <ContactSection content={t.contact} />
+            <section id="partners" className="fade-in-section flex min-h-[100svh] items-center py-16 lg:py-20">
+              <div className="mx-auto w-full max-w-6xl px-6 lg:px-8">
+                <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">
+                  {t.partners.badge}
+                </p>
+                <h2 className="reveal-item mt-4 text-3xl font-semibold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(2,8,24,0.65)] sm:text-4xl">
+                  {t.partners.title}
+                </h2>
+                <p className="reveal-item mt-6 max-w-3xl text-base leading-7 text-slate-100 drop-shadow-[0_2px_10px_rgba(2,8,24,0.55)] sm:text-lg">
+                  {t.partners.description}
+                </p>
+                <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {partnerLogos.map((partner) => (
+                    <article
+                      key={partner.name}
+                      className="reveal-item flex h-32 items-center justify-center bg-transparent p-4 transition-all duration-300 hover:-translate-y-1"
+                    >
+                      <img
+                        src={partner.src}
+                        alt={partner.name}
+                        className={`${partner.sizeClass} w-full object-contain`}
+                      />
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </main>
+          <Footer content={t.footer} />
+        </div>
       </div>
     </div>
   )

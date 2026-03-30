@@ -1,4 +1,4 @@
-function AboutSection() {
+function AboutSection({ content }) {
   return (
     <section id="about" className="fade-in-section flex min-h-[100svh] items-center py-16 lg:py-20">
       <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-8">
@@ -8,32 +8,28 @@ function AboutSection() {
           <div className="absolute -left-20 bottom-0 h-44 w-44 rounded-full bg-cyan-200/20 blur-3xl"></div>
           <div className="relative">
             <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-brand-200">
-              Since 2008
+              {content.sinceLabel}
             </p>
             <h3 className="reveal-item mt-5 text-3xl font-semibold tracking-tight">
-              Trusted by Industrial Innovators
+              {content.cardTitle}
             </h3>
             <p className="reveal-item mt-6 text-sm leading-7 text-slate-200">
-              We partner with automation leaders, energy platforms, and enterprise OEMs to deliver
-              dependable electronics for long lifecycle programs.
+              {content.cardDescription}
             </p>
           </div>
         </div>
         <div>
-          <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-brand-700">
-            About NOVASEMI
+          <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">
+            {content.badge}
           </p>
-          <h2 className="reveal-item mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-            Engineering-Centric Teams with Global Delivery Capability
+          <h2 className="reveal-item mt-4 text-3xl font-semibold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(2,8,24,0.65)] sm:text-4xl">
+            {content.title}
           </h2>
-          <p className="reveal-item mt-6 text-base leading-7 text-slate-600">
-            NOVASEMI is a B2B technology company focused on semiconductor and embedded electronics.
-            Our cross-functional teams combine chip design, manufacturing quality systems, and field
-            application engineering to support every phase from prototype to mass production.
+          <p className="reveal-item mt-6 text-base leading-7 text-slate-100 drop-shadow-[0_2px_10px_rgba(2,8,24,0.55)]">
+            {content.description1}
           </p>
-          <p className="reveal-item mt-4 text-base leading-7 text-slate-600">
-            We help enterprise clients reduce risk, optimize cost, and launch faster with transparent
-            communication, proven technical roadmaps, and long-term partnership models.
+          <p className="reveal-item mt-4 text-base leading-7 text-slate-100 drop-shadow-[0_2px_10px_rgba(2,8,24,0.55)]">
+            {content.description2}
           </p>
         </div>
       </div>

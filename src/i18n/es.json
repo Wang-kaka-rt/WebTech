@@ -1,0 +1,110 @@
+{
+  "joinUs": "Únete",
+  "switchLanguage": "Cambiar idioma",
+  "nav": [
+    { "label": "Inicio", "href": "#hero" },
+    { "label": "Servicios", "href": "#products" },
+    { "label": "Sobre Nosotros", "href": "#about" },
+    { "label": "Equipo", "href": "#team" },
+    { "label": "Contacto", "href": "#contact" },
+    { "label": "Socios", "href": "#partners" }
+  ],
+  "hero": {
+    "title": "Impulsamos la innovación global con inteligencia artificial",
+    "description1": "IBEREX es una empresa tecnológica internacional que combina I+D en IA con operación local en Europa.",
+    "description2": "Con la IA como motor principal, ofrecemos soluciones inteligentes y servicios de transformación digital para clientes globales.",
+    "primaryButton": "Sobre Nosotros",
+    "secondaryButton": "Contáctanos"
+  },
+  "products": {
+    "badge": "Products / Servicios clave",
+    "title": "Núcleo del negocio",
+    "items": [
+      {
+        "title": "I+D en tecnología de IA",
+        "description": "Incluye desarrollo de software base, investigación algorítmica y software de aplicaciones de IA."
+      },
+      {
+        "title": "Aplicaciones inteligentes e integración de sistemas",
+        "description": "Ofrecemos sistemas para la industria, control inteligente y soluciones integrales."
+      },
+      {
+        "title": "Servicios técnicos y soporte a la innovación",
+        "description": "Cubrimos desarrollo tecnológico, consultoría, transferencia y promoción."
+      },
+      {
+        "title": "Fabricación inteligente y equipos",
+        "description": "Abarca capacidades en equipos de fabricación inteligente y tecnologías relacionadas."
+      },
+      {
+        "title": "Seguridad de la información y servicios de red",
+        "description": "Incluye software de ciberseguridad, sistemas de seguridad de la información y servicios de seguridad en internet."
+      },
+      {
+        "title": "Construcción de plataformas y ecosistema",
+        "description": "Incluye plataformas públicas de IA y plataformas de innovación y emprendimiento."
+      }
+    ]
+  },
+  "about": {
+    "sinceLabel": "Desde 2008",
+    "cardTitle": "Confiado por innovadores industriales",
+    "cardDescription": "Colaboramos con líderes de automatización, plataformas energéticas y fabricantes OEM para entregar soluciones tecnológicas confiables de largo ciclo de vida.",
+    "badge": "Acerca de IBEREX",
+    "title": "Resumen del alcance empresarial",
+    "description1": "IBEREX se especializa en I+D y aplicación de IA y sistemas inteligentes. Alrededor de software, integración de sistemas y seguridad de la información, ofrecemos servicios integrados desde investigación tecnológica hasta implementación sectorial.",
+    "description2": "A través de una estrategia multidisciplinaria, brindamos soluciones inteligentes eficientes, seguras y escalables."
+  },
+  "team": {
+    "badge": "Equipo principal",
+    "title": "Dirección y equipo técnico central",
+    "description": "Nuestro equipo integra expertos multidisciplinares en IA, ingeniería de producto, operaciones internacionales y entrega de soluciones sectoriales.",
+    "members": [
+      {
+        "title": "Director de Tecnología",
+        "name": "王振宇",
+        "description": "Responsable de soluciones técnicas y entrega de productos.",
+        "experience": "Experiencia: 7 años"
+      },
+      {
+        "title": "CEO",
+        "name": "窦程",
+        "description": "Responsable de la estrategia en Europa, operación local y cumplimiento, liderando la expansión internacional.",
+        "experience": "Experiencia: 5 años"
+      },
+      {
+        "title": "Director de Mercado",
+        "name": "葛子健",
+        "description": "Apoya el cumplimiento y control de riesgos en negocios transfronterizos, impulsando cooperación local e integración de recursos.",
+        "experience": "Experiencia: 5 años"
+      }
+    ]
+  },
+  "contact": {
+    "badge": "Contacto",
+    "title": "Hablemos de tu próximo proyecto",
+    "description": "Cuéntanos tus necesidades y nuestro equipo de ingeniería te propondrá una hoja de ruta adecuada.",
+    "address": "Madrid Innovation Campus, Calle de Tecnología 88, España",
+    "phone": "+34 900 210 880",
+    "email": "sales@novasemi.com",
+    "form": {
+      "name": "Nombre",
+      "email": "Correo",
+      "message": "Mensaje",
+      "submit": "Enviar Mensaje"
+    }
+  },
+  "partners": {
+    "badge": "Organizaciones asociadas",
+    "title": "Socios del ecosistema",
+    "description": "Mantenemos colaboración a largo plazo con universidades, institutos de investigación, asociaciones industriales y empresas para impulsar innovación y aterrizaje industrial de IA."
+  },
+  "footer": {
+    "links": {
+      "products": "Servicios",
+      "about": "Sobre Nosotros",
+      "contact": "Contacto"
+    },
+    "copyright": "IBEREX Technology. Todos los derechos reservados."
+  }
+}

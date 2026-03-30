@@ -1,0 +1,110 @@
+{
+  "joinUs": "Join Us",
+  "switchLanguage": "Switch Language",
+  "nav": [
+    { "label": "Home", "href": "#hero" },
+    { "label": "Products", "href": "#products" },
+    { "label": "About", "href": "#about" },
+    { "label": "Team", "href": "#team" },
+    { "label": "Contact", "href": "#contact" },
+    { "label": "Partners", "href": "#partners" }
+  ],
+  "hero": {
+    "title": "Driving Global Innovation with Artificial Intelligence",
+    "description1": "IBEREX is an international technology company combining AI R&D with localized operations across Europe.",
+    "description2": "With AI as our core engine, we deliver intelligent solutions and digital transformation services to global clients.",
+    "primaryButton": "About Us",
+    "secondaryButton": "Contact Us"
+  },
+  "products": {
+    "badge": "Products / Core Services",
+    "title": "Our Core Business",
+    "items": [
+      {
+        "title": "AI Technology Research & Development",
+        "description": "Covers foundational software development, algorithm research, and AI application software."
+      },
+      {
+        "title": "Intelligent Applications & System Integration",
+        "description": "Provides industry application systems, intelligent control systems, and end-to-end solutions."
+      },
+      {
+        "title": "Technical Services & Innovation Support",
+        "description": "Includes technology development, consulting, transfer, and promotion across the full chain."
+      },
+      {
+        "title": "Smart Manufacturing & Equipment",
+        "description": "Involves smart foundational manufacturing equipment and related technical capabilities."
+      },
+      {
+        "title": "Information Security & Network Services",
+        "description": "Covers cybersecurity software, security equipment, information security systems, and internet security services."
+      },
+      {
+        "title": "Platform & Ecosystem Development",
+        "description": "Includes AI public service platforms and innovation & entrepreneurship platforms."
+      }
+    ]
+  },
+  "about": {
+    "sinceLabel": "Since 2008",
+    "cardTitle": "Trusted by Industrial Innovators",
+    "cardDescription": "We partner with automation leaders, energy platforms, and enterprise OEMs to deliver dependable technology for long-lifecycle programs.",
+    "badge": "About IBEREX",
+    "title": "Business Scope Overview",
+    "description1": "IBEREX focuses on the R&D and application of AI technologies and intelligent systems. Around software development, system integration, and information security, we provide integrated services from technical research to industry implementation.",
+    "description2": "Through cross-domain collaboration, we provide efficient, secure, and scalable intelligent solutions."
+  },
+  "team": {
+    "badge": "Key Team",
+    "title": "Core Management & Technical Team",
+    "description": "Our team brings together cross-domain experts in AI R&D, product engineering, global operations, and industry solution delivery.",
+    "members": [
+      {
+        "title": "Technical Director",
+        "name": "王振宇",
+        "description": "Responsible for technical solutions and product delivery.",
+        "experience": "Experience: 7 years"
+      },
+      {
+        "title": "CEO",
+        "name": "窦程",
+        "description": "Responsible for European market strategy, localized operations, and compliance, leading international expansion and execution.",
+        "experience": "Experience: 5 years"
+      },
+      {
+        "title": "Marketing Director",
+        "name": "葛子健",
+        "description": "Supports compliance and risk control in cross-border business, driving localized collaboration and resource integration.",
+        "experience": "Experience: 5 years"
+      }
+    ]
+  },
+  "contact": {
+    "badge": "Contact",
+    "title": "Let’s Discuss Your Next Program",
+    "description": "Tell us your product requirements and our engineering team will respond with the right component roadmap.",
+    "address": "Madrid Innovation Campus, Calle de Tecnología 88, Spain",
+    "phone": "+34 900 210 880",
+    "email": "sales@novasemi.com",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "submit": "Send Message"
+    }
+  },
+  "partners": {
+    "badge": "Partner Organizations",
+    "title": "Ecosystem Partners",
+    "description": "We maintain long-term collaboration with universities, research institutes, industry associations, and enterprise partners to drive AI innovation and industrial implementation."
+  },
+  "footer": {
+    "links": {
+      "products": "Products",
+      "about": "About",
+      "contact": "Contact"
+    },
+    "copyright": "IBEREX Technology. All rights reserved."
+  }
+}
