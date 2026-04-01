@@ -2,7 +2,7 @@ function ContactSection({ content }) {
   return (
     <section
       id="contact"
-      className="fade-in-section flex min-h-[calc(100svh-72px)] items-center py-16 lg:py-20"
+      className="fade-in-section flex min-h-[100svh] items-center py-16 lg:py-20"
     >
       <div className="mx-auto grid w-full max-w-6xl gap-10 rounded-3xl border border-slate-200/90 bg-white/70 p-6 backdrop-blur-sm sm:p-8 lg:grid-cols-2 lg:p-12">
         <div>

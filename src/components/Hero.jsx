@@ -58,7 +58,7 @@ function Hero({ content }) {
     <section
       id="hero"
       ref={heroRef}
-      className="fade-in-section relative flex min-h-[calc(100svh-72px)] items-center overflow-hidden py-14 lg:py-20"
+      className="fade-in-section relative flex min-h-[100svh] items-center overflow-hidden py-14 lg:py-20"
     >
       <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pt-6 lg:px-8 lg:pt-10">
         <div className="mx-auto max-w-4xl">

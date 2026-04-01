@@ -18,7 +18,6 @@ import tokPartnerLogo from './resource/合作/tok.png'
 import ibizhongPartnerLogo from './resource/合作/伊比中新时代.png'
 
 const sectionIds = ['hero', 'products', 'about', 'team', 'contact', 'partners']
-const navOffset = 72
 const teamPhotos = [wangZhenyuImage, douChengImage, geZijianImage]
 const productIcons = ['🧠', '⚙️', '💡', '🏭', '🛡️', '🌐']
 const partnerLogos = [
@@ -540,7 +539,7 @@ function App() {
     transitionTimeline.to(
       scrollState,
       {
-        y: Math.max(target.offsetTop - navOffset, 0),
+        y: Math.max(target.offsetTop, 0),
         duration: scrollDuration,
         ease: 'power3.out',
         onUpdate: () => {
@@ -694,7 +693,7 @@ function App() {
             <AboutSection content={t.about} />
             <section
               id="team"
-              className="team-section fade-in-section flex min-h-[calc(100svh-72px)] items-center py-10 sm:py-12 lg:py-14 xl:py-16"
+              className="team-section fade-in-section flex min-h-[100svh] items-center py-10 sm:py-12 lg:py-14 xl:py-16"
             >
               <div className="team-shell mx-auto -mt-1 w-full max-w-6xl px-6 sm:-mt-2 lg:-mt-3 xl:-mt-6 2xl:-mt-10 lg:px-8">
                 <p className="team-badge reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">
@@ -731,7 +730,7 @@ function App() {
             <ContactSection content={t.contact} />
             <section
               id="partners"
-              className="fade-in-section flex min-h-[calc(100svh-72px)] items-center py-16 lg:py-24"
+              className="fade-in-section flex min-h-[100svh] items-center py-16 lg:py-24"
             >
               <div className="mx-auto w-full max-w-6xl px-6 lg:px-8">
                 <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">

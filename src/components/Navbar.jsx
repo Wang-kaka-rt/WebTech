@@ -49,7 +49,7 @@ function Navbar({
     }
     const target = document.querySelector(href)
     if (target) {
-      const offsetTop = target.getBoundingClientRect().top + window.scrollY - 72
+      const offsetTop = target.getBoundingClientRect().top + window.scrollY
       window.scrollTo({ top: Math.max(offsetTop, 0), behavior: 'smooth' })
     }
   }
