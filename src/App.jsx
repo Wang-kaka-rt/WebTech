@@ -18,6 +18,7 @@ import tokPartnerLogo from './resource/合作/tok.png'
 import ibizhongPartnerLogo from './resource/合作/伊比中新时代.png'
 
 const sectionIds = ['hero', 'products', 'about', 'team', 'contact', 'partners']
+const navOffset = 72
 const teamPhotos = [wangZhenyuImage, douChengImage, geZijianImage]
 const productIcons = ['🧠', '⚙️', '💡', '🏭', '🛡️', '🌐']
 const partnerLogos = [
@@ -39,9 +40,6 @@ function App() {
   const [isIntroDone, setIsIntroDone] = useState(false)
   const isTransitioningRef = useRef(false)
   const transitionTweenRef = useRef(null)
-  const wheelIntentRef = useRef(0)
-  const lastWheelEventAtRef = useRef(0)
-  const wheelCooldownUntilRef = useRef(0)
   const t = useMemo(() => TRANSLATIONS[language] ?? TRANSLATIONS[DEFAULT_LANGUAGE], [language])
   const languageSwitcher = useMemo(() => {
     const currentIndex = LANGUAGE_OPTIONS.findIndex((item) => item.code === language)
@@ -477,8 +475,6 @@ function App() {
     }
 
     isTransitioningRef.current = true
-    wheelCooldownUntilRef.current = performance.now() + 280 + jumpDistance * 40
-
     const transitionColor = ['59,130,246', '56,189,248', '99,102,241', '37,99,235', '29,78,216'][nextIndex]
     const gradientAnchor = direction > 0 ? '50% 56%' : '50% 44%'
 
@@ -544,7 +540,7 @@ function App() {
     transitionTimeline.to(
       scrollState,
       {
-        y: target.offsetTop,
+        y: Math.max(target.offsetTop - navOffset, 0),
         duration: scrollDuration,
         ease: 'power3.out',
         onUpdate: () => {
@@ -635,55 +631,14 @@ function App() {
     })
   }, [])
 
-  useEffect(() => {
-    const handleWheel = (event) => {
-      if (!isIntroDone) {
-        event.preventDefault()
-        return
-      }
-      if (performance.now() < wheelCooldownUntilRef.current) {
-        event.preventDefault()
-        return
-      }
-
-      if (isTransitioningRef.current) {
-        event.preventDefault()
-        return
-      }
-
-      if (Math.abs(event.deltaY) < 3) {
-        return
-      }
-
-      event.preventDefault()
-      const now = performance.now()
-      if (now - lastWheelEventAtRef.current > 140) {
-        wheelIntentRef.current = 0
-      }
-      wheelIntentRef.current += event.deltaY
-      lastWheelEventAtRef.current = now
-      if (Math.abs(wheelIntentRef.current) < 24) {
-        return
-      }
-      const nextDirection = wheelIntentRef.current > 0 ? 1 : -1
-      wheelIntentRef.current = 0
-      const current = getCurrentIndex()
-      const next = current + nextDirection
-      if (next < 0 || next >= sectionIds.length) {
-        return
-      }
-
-      playPageTransition(next, nextDirection)
-    }
-
-    window.addEventListener('wheel', handleWheel, { passive: false })
-    return () => {
-      window.removeEventListener('wheel', handleWheel)
+  useEffect(
+    () => () => {
       if (transitionTweenRef.current) {
         transitionTweenRef.current.kill()
       }
-    }
-  }, [getCurrentIndex, isIntroDone, playPageTransition])
+    },
+    [],
+  )
 
   return (
     <div className="relative min-h-screen bg-transparent">
@@ -731,48 +686,53 @@ function App() {
           currentLanguageLabel={languageSwitcher.currentLabel}
           nextLanguageLabel={languageSwitcher.nextLabel}
           switchLanguageLabel={t.switchLanguage}
-          joinLabel={t.joinUs}
         />
-        <div className="relative z-10 pt-12 lg:pl-52 lg:pt-0">
+        <div className="relative z-10">
           <main>
             <Hero content={t.hero} />
             <ProductsSection products={products} content={t.products} />
             <AboutSection content={t.about} />
-            <section id="team" className="fade-in-section flex min-h-[100svh] items-start py-14 lg:py-16">
-              <div className="mx-auto w-full max-w-6xl px-6 lg:px-8">
-                <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">
+            <section
+              id="team"
+              className="team-section fade-in-section flex min-h-[calc(100svh-72px)] items-center py-10 sm:py-12 lg:py-14 xl:py-16"
+            >
+              <div className="team-shell mx-auto -mt-1 w-full max-w-6xl px-6 sm:-mt-2 lg:-mt-3 xl:-mt-6 2xl:-mt-10 lg:px-8">
+                <p className="team-badge reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">
                   {t.team.badge}
                 </p>
-                <h2 className="reveal-item mt-4 text-3xl font-semibold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(2,8,24,0.65)] sm:text-4xl">
+                <h2 className="team-title reveal-item mt-4 text-3xl font-semibold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(2,8,24,0.65)] sm:text-4xl">
                   {t.team.title}
                 </h2>
-                <p className="reveal-item mt-6 max-w-3xl text-base leading-7 text-slate-100 drop-shadow-[0_2px_10px_rgba(2,8,24,0.55)] sm:text-lg">
+                <p className="team-description reveal-item mt-6 max-w-3xl text-base leading-7 text-slate-100 drop-shadow-[0_2px_10px_rgba(2,8,24,0.55)] sm:text-lg">
                   {t.team.description}
                 </p>
-                <div className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                <div className="team-grid mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {coreTeam.map((member) => (
                     <article
                       key={member.name}
-                      className="reveal-item flex h-full flex-col rounded-2xl bg-gradient-to-b from-transparent via-white/65 to-white/65 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card"
+                      className="team-card reveal-item flex h-full flex-col rounded-2xl bg-gradient-to-b from-transparent via-white/65 to-white/65 p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card xl:p-5"
                     >
                       <div className="mb-4">
                         <img
                           src={member.photo}
                           alt={member.name}
-                          className="h-52 w-full object-contain drop-shadow-[0_14px_22px_rgba(15,23,42,0.2)]"
+                          className="team-photo h-40 w-full object-contain drop-shadow-[0_14px_22px_rgba(15,23,42,0.2)] sm:h-44 lg:h-48 xl:h-52"
                         />
                       </div>
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-700">{member.title}</p>
-                      <h3 className="mt-2 text-2xl font-semibold text-slate-900">{member.name}</h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{member.description}</p>
-                      <p className="mt-auto pt-3 text-sm font-semibold text-slate-700">{member.experience}</p>
+                      <h3 className="team-name mt-2 text-2xl font-semibold text-slate-900">{member.name}</h3>
+                      <p className="team-member-description mt-2 text-sm leading-6 text-slate-600">{member.description}</p>
+                      <p className="team-experience mt-auto pt-3 text-sm font-semibold text-slate-700">{member.experience}</p>
                     </article>
                   ))}
                 </div>
               </div>
             </section>
             <ContactSection content={t.contact} />
-            <section id="partners" className="fade-in-section flex min-h-[100svh] items-center py-16 lg:py-20">
+            <section
+              id="partners"
+              className="fade-in-section flex min-h-[calc(100svh-72px)] items-center py-16 lg:py-24"
+            >
               <div className="mx-auto w-full max-w-6xl px-6 lg:px-8">
                 <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">
                   {t.partners.badge}

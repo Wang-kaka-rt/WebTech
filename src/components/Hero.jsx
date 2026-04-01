@@ -58,9 +58,9 @@ function Hero({ content }) {
     <section
       id="hero"
       ref={heroRef}
-      className="fade-in-section relative flex min-h-[100svh] items-center overflow-hidden py-16 lg:-ml-52 lg:w-[calc(100%+13rem)] lg:py-20"
+      className="fade-in-section relative flex min-h-[calc(100svh-72px)] items-center overflow-hidden py-14 lg:py-20"
     >
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 lg:pl-32 lg:pr-8">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pt-6 lg:px-8 lg:pt-10">
         <div className="mx-auto max-w-4xl">
           <div
             ref={panelRef}

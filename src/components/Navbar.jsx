@@ -8,7 +8,6 @@ function Navbar({
   currentLanguageLabel,
   nextLanguageLabel,
   switchLanguageLabel,
-  joinLabel,
 }) {
   const [activeId, setActiveId] = useState('')
   const navItems = useMemo(() => links, [links])
@@ -50,95 +49,52 @@ function Navbar({
     }
     const target = document.querySelector(href)
     if (target) {
-      target.scrollIntoView({ behavior: 'auto', block: 'start' })
+      const offsetTop = target.getBoundingClientRect().top + window.scrollY - 72
+      window.scrollTo({ top: Math.max(offsetTop, 0), behavior: 'smooth' })
     }
   }
 
   return (
-    <>
-      <a
-        href="#hero"
-        onClick={(event) => handleNavigate(event, '#hero')}
-        className="fixed left-5 top-4 z-50 inline-flex items-center"
-      >
-        <img src={logoImage} alt="IBEREX" className="h-10 w-auto object-contain lg:h-12" />
-      </a>
-      <div className="fixed right-5 top-5 z-50 hidden items-center gap-2 lg:flex">
-        <button
-          type="button"
-          onClick={onLanguageCycle}
-          aria-label={`${switchLanguageLabel}: ${nextLanguageLabel}`}
-          className="inline-flex items-center gap-2 rounded-full border border-white/55 bg-slate-900/25 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20 hover:text-white"
-        >
-          <span className="text-sm leading-none">🌐</span>
-          <span>{currentLanguageLabel}</span>
-        </button>
+    <header className="fixed inset-x-0 top-0 z-50 bg-transparent">
+      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-4 lg:gap-6 lg:px-8">
         <a
-          href="#contact"
-          onClick={(event) => handleNavigate(event, '#contact')}
-          className="rounded-full border border-white/55 bg-slate-900/25 px-4 py-2 text-xs font-semibold text-white backdrop-blur-md transition-colors hover:bg-brand-600 hover:text-white"
+          href="#hero"
+          onClick={(event) => handleNavigate(event, '#hero')}
+          className="inline-flex shrink-0 items-center"
         >
-          {joinLabel}
+          <img src={logoImage} alt="IBEREX" className="h-11 w-auto object-contain lg:h-12" />
         </a>
-      </div>
-
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-transparent bg-transparent lg:hidden">
-        <nav className="mx-auto flex w-full items-center justify-between gap-4 px-5 py-3">
-          <button
-            type="button"
-            onClick={onLanguageCycle}
-            aria-label={`${switchLanguageLabel}: ${nextLanguageLabel}`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/45 bg-slate-900/35 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md"
-          >
-            <span className="text-xs leading-none">🌐</span>
-            <span>{currentLanguageLabel}</span>
-          </button>
-          <div className="flex items-center gap-4">
-          {navItems.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={(event) => handleNavigate(event, link.href)}
-              className="text-xs font-medium text-white/85"
-            >
-              {link.label}
-            </a>
-          ))}
-          </div>
-        </nav>
-      </header>
-
-      <aside className="fixed left-5 top-1/2 z-40 hidden w-44 -translate-y-1/2 p-4 lg:block">
-        <nav className="relative pl-5">
-          <span className="absolute left-[7px] top-2 h-[calc(100%-0.5rem)] w-px bg-white/55"></span>
-          <div className="space-y-5">
+        <nav className="flex-1 overflow-x-auto">
+          <div className="flex min-w-max items-center gap-3 lg:justify-center lg:gap-6">
             {navItems.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 onClick={(event) => handleNavigate(event, link.href)}
-                className={`group relative flex items-center text-sm font-medium transition-colors ${
+                className={`text-xs font-semibold transition-colors lg:text-sm ${
                   activeId === link.href.replace('#', '')
-                    ? 'text-cyan-200'
+                    ? 'text-cyan-100'
                     : 'text-white/80 hover:text-white'
                 }`}
               >
-                <span className="absolute -left-5 inline-flex h-4 w-4 items-center justify-center">
-                  <span
-                    className={`rounded-full border border-cyan-300 transition-all ${
-                      activeId === link.href.replace('#', '')
-                        ? 'h-3 w-3 bg-cyan-300 shadow-[0_0_0_4px_rgba(103,232,249,0.28)]'
-                        : 'h-2.5 w-2.5 bg-white group-hover:scale-110 group-hover:bg-cyan-300'
-                    }`}
-                  ></span>
-                </span>
                 {link.label}
               </a>
             ))}
           </div>
         </nav>
-      </aside>
-    </>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={onLanguageCycle}
+            aria-label={`${switchLanguageLabel}: ${nextLanguageLabel}`}
+            className="inline-flex items-center gap-1 text-[11px] font-semibold text-white/85 transition-colors hover:text-white lg:text-xs"
+          >
+            <span className="text-xs leading-none">🌐</span>
+            <span>{currentLanguageLabel}</span>
+          </button>
+        </div>
+      </div>
+    </header>
   )
 }
 

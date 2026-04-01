@@ -1,6 +1,9 @@
 function AboutSection({ content }) {
   return (
-    <section id="about" className="fade-in-section flex min-h-[100svh] items-center py-16 lg:py-20">
+    <section
+      id="about"
+      className="fade-in-section flex min-h-[calc(100svh-72px)] items-center py-16 lg:py-20"
+    >
       <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-6 lg:grid-cols-2 lg:px-8">
         <div className="reveal-item relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-900/88 p-8 text-white backdrop-blur-sm">
           <div className="absolute inset-0 bg-gradient-to-br from-brand-600/45 via-slate-900/95 to-slate-900/95"></div>

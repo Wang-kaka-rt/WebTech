@@ -22,15 +22,16 @@ const useFadeInOnScroll = (selector) => {
             y: 0,
             filter: 'blur(0px)',
             scale: 1,
-            duration: 0.85,
-            stagger: 0.09,
-            ease: 'power3.out',
+            duration: 0.55,
+            stagger: 0.05,
+            ease: 'power2.out',
           })
           observer.unobserve(entry.target)
         })
       },
       {
-        threshold: 0.22,
+        threshold: 0.1,
+        rootMargin: '0px 0px -8% 0px',
       },
     )
 
@@ -39,9 +40,9 @@ const useFadeInOnScroll = (selector) => {
       const targets = revealItems.length ? revealItems : [section]
       gsap.set(targets, {
         opacity: 0,
-        y: 34,
-        filter: 'blur(8px)',
-        scale: 0.985,
+        y: 22,
+        filter: 'blur(4px)',
+        scale: 0.992,
       })
       observer.observe(section)
     })

@@ -21,26 +21,29 @@ function ProductsSection({ products, content }) {
   ]
 
   return (
-    <section id="products" className="fade-in-section flex min-h-[100svh] items-center py-10 lg:py-12">
-      <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 lg:grid-cols-[320px_minmax(0,1fr)] lg:items-center lg:gap-8 lg:px-8">
+    <section
+      id="products"
+      className="fade-in-section flex min-h-[calc(100svh-72px)] items-center py-8 lg:py-10"
+    >
+      <div className="mx-auto grid w-full max-w-6xl gap-6 px-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-center lg:gap-6 xl:grid-cols-[300px_minmax(0,1fr)] xl:gap-8 lg:px-8">
         <div className="flex h-full flex-col items-start justify-center">
           <div className="reveal-item inline-flex">
-            <img src={logoImage} alt="IBEREX" className="h-24 w-auto object-contain lg:h-28" />
+            <img src={logoImage} alt="IBEREX" className="h-16 w-auto object-contain sm:h-20 lg:h-24" />
           </div>
-          <div className="mt-5">
+          <div className="mt-4">
             <p className="reveal-item text-sm font-semibold uppercase tracking-[0.18em] text-cyan-100/95 drop-shadow-[0_2px_8px_rgba(2,8,24,0.55)]">
               {content.badge}
             </p>
-            <h2 className="reveal-item mt-3 text-3xl font-semibold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(2,8,24,0.65)] sm:text-4xl">
+            <h2 className="reveal-item mt-2.5 text-3xl font-semibold tracking-tight text-white drop-shadow-[0_4px_14px_rgba(2,8,24,0.65)] sm:text-4xl">
               {content.title}
             </h2>
           </div>
         </div>
-        <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 lg:gap-5 xl:grid-cols-3">
+        <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 lg:gap-4 xl:grid-cols-3">
           {products.map((item, index) => (
             <article
               key={item.title}
-              className="reveal-item relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/40 bg-slate-900/25 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card"
+              className="reveal-item relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/40 bg-slate-900/25 p-3 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card sm:p-4"
             >
               <img
                 src={cardBgImage}
@@ -52,11 +55,15 @@ function ProductsSection({ products, content }) {
                 className={`pointer-events-none absolute inset-0 ${cardOverlayClasses[index % cardOverlayClasses.length]}`}
               ></div>
               <div className="relative z-10 flex h-full flex-col">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/85 text-xl">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white/85 text-base sm:h-9 sm:w-9 sm:text-lg">
                   {item.icon}
                 </span>
-                <h3 className="mt-4 text-[1.35rem] font-semibold leading-8 text-white">{item.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-100">{item.description}</p>
+                <h3 className="mt-3 text-[1.2rem] font-semibold leading-7 text-white sm:text-[1.3rem] sm:leading-7 max-[1400px]:text-[1.15rem] max-[1400px]:leading-6">
+                  {item.title}
+                </h3>
+                <p className="mt-1.5 text-xs leading-5 text-slate-100 sm:text-sm sm:leading-6 max-[1400px]:text-[13px] max-[1400px]:leading-5">
+                  {item.description}
+                </p>
               </div>
             </article>
           ))}
